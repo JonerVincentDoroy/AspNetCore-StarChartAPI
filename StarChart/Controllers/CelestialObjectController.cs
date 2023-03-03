@@ -87,5 +87,112 @@ namespace StarChart.Controllers
             }
             return Ok(celestialObjects);
         }
+
+        /*
+        Create the Create Method
+
+        In the CelestialObjectController class create the Create method
+
+        This method should have a return type of IActionResult.
+        This method should accept a parameter of type [FromBody]CelestialObject.
+        This method should have an HttpPost attribute.
+        This method should add the provided CelestialObject to the CelestialObjects DbSet then call SaveChanges.
+        This method should return a CreatedAtRoute with the arguments
+        "GetById"
+        A new object with an id of the CelestialObject's Id. (Note: use the new {  } format.)
+        The provided CelestialObject. (Note: You will need to add a using directive for StarChart.Models)
+        */
+        [HttpPost]
+        public IActionResult Create([FromBody] CelestialObject celestial)
+        {
+            _context.CelestialObjects.Add(celestial);
+            
+            _context.SaveChanges();
+
+            return CreatedAtRoute("GetById", new { id = celestial.Id }, celestial);
+        }
+
+        /*
+        Create Update Action
+
+        Create the Update method
+
+        This method should have a return type of IActionResult.
+        This method should accept a parameter of type int named id and a parameter of type CelestialObject.
+        This method should have the HttpPut attribute with a value of "{id}".
+        This method should locate the CelestialObject with an Id that matches the provided int parameter.
+        If no match is found return NotFound().
+        If a match is found set it's Name, OrbitalPeriod, and OrbitedObjectId properties based on the provided CelestialObject parameter. Call Update on the CelestialObjects DbSet with an argument of the updated CelestialObject, and then call SaveChanges.
+        This method should return NoContent().
+        */
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, CelestialObject celestial)
+        {
+            var locateCelestial = _context.CelestialObjects.Find(id);
+            if (locateCelestial == null)
+            {
+                return NotFound();
+            }
+            locateCelestial.Name= celestial.Name;
+            locateCelestial.OrbitalPeriod = celestial.OrbitalPeriod;
+            locateCelestial.OrbitedObjectId = celestial.Id;
+            _context.CelestialObjects.Update(locateCelestial);
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        /*
+        Create RenameObject Action
+
+        Create the RenameObject method
+
+        This method should have a return type of IActionResult.
+        This method should accept a parameter of type int named id and a parameter of type string named name.
+        This method should have the HttpPatch attribute with an argument of "{id}/{name}".
+        This method should locate the CelestialObject with an Id that matches the provided int parameter.
+        If no match is found return NotFound().
+        If a match is found set it's Name property to the provided string parameter. Then call Update on the CelestialObjects DbSet with an argument of the updated CelestialObject, and then call SaveChanges.
+        This method should return NoContent().
+        */
+        [HttpPatch("{id}/{name}")]
+        public IActionResult RenameObject(int id, string name)
+        {
+            var locateCelestial = _context.CelestialObjects.Find(id);
+            if (locateCelestial == null)
+            {
+                return NotFound();
+            }
+            locateCelestial.Name = name;
+            _context.CelestialObjects.Update(locateCelestial);
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        /*
+        Create Delete Action
+
+        Create the Delete method
+
+        This method should have a return type of IActionResult.
+        This method should accept a parameter of type int named id.
+        This method should have the HttpDelete attribute with an argument of "{id}".
+        This method should get a List of all CelestialObjects who either have an Id or OrbitedObject with an Id that matches the provided parameter.
+        If there are no matches it should return NotFound().
+        If there are matching CelestialObjects call RemoveRange on the CelestialObjects DbSet with an argument of the list of matching CelestialObjects. Then call SaveChanges.
+        This method should return NoContent().
+        */
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var celestial = _context.CelestialObjects.Where(star => (star.Id == id || star.OrbitedObjectId == id)).ToList();
+            if (!celestial.Any()) 
+            {
+                return NotFound();
+            }
+
+            _context.CelestialObjects.RemoveRange(celestial);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
 }
